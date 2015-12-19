@@ -13,10 +13,9 @@ sub rdump {
 
         my $type = ref($o);
 
-        print "$prefix$type\n" if $type ne '';
-        $prefix .= "  |";
-
         if ($type eq 'HASH') {
+
+                $prefix .= "  |";
 
                 for my $k (keys %{$o}) {
                         print "$prefix- ", "$k", "\n";
@@ -24,6 +23,8 @@ sub rdump {
                 }
 
         } elsif ($type eq 'ARRAY') {
+
+                $prefix .= "  |";
 
                 for my $k (keys @{$o}) {
                         print "$prefix- ", $k, "\n";
@@ -39,6 +40,8 @@ sub rdump {
                         rdump("$prefix", $n);
 
                 } else {
+
+                        $prefix .= "  |";
 
                         print "$prefix- ", $o, "\n";
 
