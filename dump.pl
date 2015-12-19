@@ -29,6 +29,7 @@ foreach my $k0 (keys %{$j0}) {
                 for my $k1 (keys %{$j1}) {
 
                         print "\t\t", $k1, "\n";
+                        print "\t\t\t", $j1->{$k1}, "\n";
 
                 }
         } else {
