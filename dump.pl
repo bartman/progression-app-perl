@@ -9,51 +9,62 @@ my $txt = <IN>;
 close(IN);
 
 sub rdump {
-        my ($prefix, $o) = @_;
+        my ($prefix, $n, $o) = @_;
 
         my $type = ref($o);
 
         if ($type eq 'HASH') {
 
-                $prefix .= "  |";
+                print "$prefix- ", $n, "\n";
 
-                for my $k (keys %{$o}) {
-                        print "$prefix- ", "$k", "\n";
-                        rdump("$prefix", $o->{$k});
+                my @keys = sort keys %{$o};
+                while (@keys) {
+                        my $k = shift @keys;
+                        my $p;
+                        if (@keys) { $p = "$prefix  |"; }
+                        else       { $p = "$prefix   "; }
+                        rdump($p, $k, $o->{$k});
                 }
 
         } elsif ($type eq 'ARRAY') {
 
-                $prefix .= "  |";
+                print "$prefix- ", $n, "\n";
 
-                for my $k (keys @{$o}) {
-                        print "$prefix- ", $k, "\n";
-                        rdump("$prefix", $o->[$k]);
+                my @keys = sort keys @{$o};
+
+                while (@keys) {
+                        my $k = shift @keys;
+                        my $p;
+                        if (@keys) { $p = "$prefix  |"; }
+                        else       { $p = "$prefix   "; }
+                        rdump($p, "[$k]", $o->[$k]);
                 }
 
         } elsif ($type eq '') {
 
                 if ($o =~ m/^[\[{]/) {
 
-                        my $n = decode_json $o;
+                        my $j = decode_json $o;
 
-                        rdump("$prefix", $n);
+                        rdump("$prefix", $n, $j);
 
                 } else {
 
-                        $prefix .= "  |";
-
-                        print "$prefix- ", $o, "\n";
+                        print "$prefix- $n = $o\n";
 
                 }
+        } elsif ($type eq 'JSON::PP::Boolean') {
+
+                print "$prefix  |- ", $o, "\n";
+
+        } else {
+                print "$prefix- UNHANDLED TYPE '$type' !!!\n";
         }
 }
 
 my $j0 = decode_json $txt;
 
-foreach my $k0 (keys %{$j0}) {
+foreach my $k0 (sort keys %{$j0}) {
 
-        print $k0, "\n";
-
-        rdump("", $j0->{$k0});
+        rdump("", $k0, $j0->{$k0});
 }
