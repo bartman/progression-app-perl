@@ -1,12 +1,10 @@
 #!/usr/bin/perl -w
 use strict;
+use MIME::Base64;
 use JSON;
 
-my $file = 'data/2015-12-13-21-05-18.json';
-
-open(IN, $file) || die "$file: failed to open";
-my $txt = <IN>;
-close(IN);
+#my $file = 'data/2015-12-13-21-05-18.json';
+my $file = 'data/2015-12-13-21-05-18.progressionbackup';
 
 sub rdump {
         my ($prefix, $n, $o) = @_;
@@ -60,6 +58,14 @@ sub rdump {
         } else {
                 print "$prefix- UNHANDLED TYPE '$type' !!!\n";
         }
+}
+
+open(IN, $file) || die "$file: failed to open";
+my $txt = <IN>;
+close(IN);
+
+if ($txt =~ m/==$/) {
+        $txt = decode_base64($txt);
 }
 
 my $j0 = decode_json $txt;
