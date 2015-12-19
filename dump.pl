@@ -8,31 +8,49 @@ open(IN, $file) || die "$file: failed to open";
 my $txt = <IN>;
 close(IN);
 
+sub rdump {
+        my ($prefix, $o) = @_;
+
+        my $type = ref($o);
+
+        print "$prefix$type\n" if $type ne '';
+        $prefix .= "  |";
+
+        if ($type eq 'HASH') {
+
+                for my $k (keys %{$o}) {
+                        print "$prefix- ", "$k", "\n";
+                        rdump("$prefix", $o->{$k});
+                }
+
+        } elsif ($type eq 'ARRAY') {
+
+                for my $k (keys @{$o}) {
+                        print "$prefix- ", $k, "\n";
+                        rdump("$prefix", $o->[$k]);
+                }
+
+        } elsif ($type eq '') {
+
+                if ($o =~ m/^[\[{]/) {
+
+                        my $n = decode_json $o;
+
+                        rdump("$prefix", $n);
+
+                } else {
+
+                        print "$prefix- ", $o, "\n";
+
+                }
+        }
+}
+
 my $j0 = decode_json $txt;
 
 foreach my $k0 (keys %{$j0}) {
 
         print $k0, "\n";
 
-        my $j1 = decode_json $j0->{$k0};
-
-        print "\t", ref($j1), "\n";
-
-        if (ref($j1) eq "ARRAY") {
-                for my $e (keys @{$j1}) {
-
-                        print "\t\t", $e, "\n";
-
-                }
-
-        } elsif (ref($j1) eq "HASH") {
-                for my $k1 (keys %{$j1}) {
-
-                        print "\t\t", $k1, "\n";
-                        print "\t\t\t", $j1->{$k1}, "\n";
-
-                }
-        } else {
-                print "\t\t", "???", "\n";
-        }
+        rdump("", $j0->{$k0});
 }
