@@ -3,9 +3,6 @@ use strict;
 use MIME::Base64;
 use JSON;
 
-#my $file = 'data/2015-12-13-21-05-18.json';
-my $file = 'data/2015-12-13-21-05-18.progressionbackup';
-
 sub rdump {
         my ($prefix, $n, $o) = @_;
 
@@ -60,17 +57,30 @@ sub rdump {
         }
 }
 
-open(IN, $file) || die "$file: failed to open";
-my $txt = <IN>;
-close(IN);
+sub dumpfile {
+        my ($file) = @_;
 
-if ($txt =~ m/==$/) {
-        $txt = decode_base64($txt);
+        open(IN, $file) || die "$file: failed to open";
+        my $txt = <IN>;
+        close(IN);
+
+        if ($txt =~ m/==$/) {
+                $txt = decode_base64($txt);
+        }
+
+        my $j0 = decode_json $txt;
+
+        foreach my $k0 (sort keys %{$j0}) {
+
+                rdump("", $k0, $j0->{$k0});
+        }
 }
 
-my $j0 = decode_json $txt;
+my $file;
 
-foreach my $k0 (sort keys %{$j0}) {
+die "$0 <progressionbackup>\n" if $#ARGV < 0;
 
-        rdump("", $k0, $j0->{$k0});
+foreach my $file (@ARGV) {
+
+        dumpfile($file);
 }
