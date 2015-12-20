@@ -1,4 +1,8 @@
 #!/usr/bin/perl -w
+#
+# this program can dump a Progression backup file with niceer nesting and sorting
+#
+
 use strict;
 use MIME::Base64;
 use JSON;
