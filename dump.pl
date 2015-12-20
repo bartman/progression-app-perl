@@ -3,6 +3,40 @@ use strict;
 use MIME::Base64;
 use JSON;
 
+
+sub specialsort {
+        my (@in) = @_;
+        my @out = ();
+
+        # list of keys we'd like to have come up first
+        my @like = qw{ name id };
+
+        # have we seen them
+        my %seen = ();
+
+        # move the in -> out removing the thing we'd like first
+        foreach my $k (@in) {
+
+                if ($k ~~ @like) {
+
+                        $seen{$k} = 1;
+
+                } else {
+
+                        push @out, $k;
+
+                }
+        }
+
+        # now prefix with the things we'd like first
+        my @first = ();
+        foreach my $k (@like) {
+                push @first, $k if ($seen{$k});
+        }
+
+        return (@first,@out);
+}
+
 sub rdump {
         my ($prefix, $n, $o) = @_;
 
@@ -12,7 +46,7 @@ sub rdump {
 
                 print "$prefix- ", $n, "\n";
 
-                my @keys = sort keys %{$o};
+                my @keys = specialsort keys %{$o};
                 while (@keys) {
                         my $k = shift @keys;
                         my $p;
