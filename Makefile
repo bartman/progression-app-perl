@@ -2,8 +2,10 @@
 DATA_DIR = data
 
 PBS   = $(wildcard ${DATA_DIR}/*.progressionbackup)
-JSONS = ${PBS:.progressionbackup=.json}
+TXTS  = ${PBS:.progressionbackup=.txt}
 
-json: ${JSONS}
-${JSONS}: %.json: %.progressionbackup Makefile
-	base64 --decode < $< > $@
+all: txts
+
+txts: ${TXTS}
+${TXTS}: %.txt: %.progressionbackup Makefile dump.pl
+	./dump.pl $< > $@
