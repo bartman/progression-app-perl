@@ -6,7 +6,16 @@
 use strict;
 use MIME::Base64;
 use JSON;
-use Math::Round;
+# if Math
+BEGIN {
+        unless (eval "use Math::Round") {
+                sub round {
+                        my ($in) = @_;
+                        return $in if not defined $in;
+                        return int($in + 0.5);
+                }
+        }
+}
 
 sub expand_nested {
         my ($in) = @_;
