@@ -66,33 +66,50 @@ sub summarize_data {
                         my $performance = $a->{performance};
                         my $completed = $performance->{completedSets};
 
+                        my $last = "";
+                        my $rep = 0;
+
                         for ( my $si=0; $si<=$#$completed; $si++ ) {
 
                                 my $s = $completed->[$si];
+                                my $this = "";
 
                                 if (defined $s->{weight}) {
-
                                         my $kg_to_lb = 2.20462;
                                         my $lb = round ($s->{weight} * $kg_to_lb);
-
-                                        print "    ",
-                                                "$lb x ",
-                                                $s->{reps},
-                                                "\n";
+                                        $this = "$lb x " .  $s->{reps};
 
                                 } elsif (defined $s->{duration}) {
-
                                         my $sec = $s->{duration} / 1000;
-
-                                        print "    ",
-                                                "$sec sec",
-                                                "\n";
+                                        $this = "$sec sec";
 
                                 } else {
-                                        print "    ",
-                                                "BW x ",
-                                                $s->{reps},
-                                                "\n";
+                                        $this = "BW x " . $s->{reps};
+                                }
+
+                                if ($this eq $last) {
+
+                                        $rep ++;
+
+                                } else {
+                                        if ($rep>0) {
+                                                if ($rep>1) {
+                                                        print "    ", $last, " x $rep\n";
+                                                } else {
+                                                        print "    ", $last, "\n";
+                                                }
+                                        }
+
+                                        $last = $this;
+                                        $rep = 1;
+                                }
+                        }
+
+                        if ($rep>0) {
+                                if ($rep>1) {
+                                        print "    ", $last, " x $rep\n";
+                                } else {
+                                        print "    ", $last, "\n";
                                 }
                         }
                 }
