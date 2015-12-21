@@ -6,6 +6,7 @@
 use strict;
 use MIME::Base64;
 use JSON;
+use POSIX qw(strftime);
 # if Math
 BEGIN {
         unless (eval "use Math::Round") {
@@ -42,6 +43,15 @@ sub summarize_data {
 
                 print "[$wi] ",
                         $w->{name},
+                        "\n";
+
+                my $startTime = $w->{startTime} / 1000;
+                my $endTime = $w->{endTime} / 1000;
+
+                my $start = strftime "%Y/%m/%d %H:%M:%S", localtime($startTime);
+                my $hours = ($endTime - $startTime) / 3600;
+
+                print "  @ $start + $hours hours",
                         "\n";
 
                 my $activities = $w->{activities};
