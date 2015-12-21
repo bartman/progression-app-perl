@@ -49,10 +49,9 @@ sub summarize_data {
                 my $endTime = $w->{endTime} / 1000;
 
                 my $start = strftime "%Y/%m/%d %H:%M:%S", localtime($startTime);
-                my $hours = ($endTime - $startTime) / 3600;
+                my $hours = int(($endTime - $startTime) / 36) / 100;
 
-                print "  @ $start + $hours hours",
-                        "\n";
+                print "  @ $start + $hours hours\n";
 
                 my $activities = $w->{activities};
 
