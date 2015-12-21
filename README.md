@@ -6,9 +6,17 @@ See http://www.progression-app.com/ to learn more about Progression.
 
 # what can I do?
 
-If you export your workouts with Progression, you'll get a `DATE TIME.progressionbackup` file.  You can dump the file into a humanly legilbe format using `dump.pl`.
+If you export your workouts with Progression, you'll get a `DATE TIME.progressionbackup` file.
 
-   ./dump.pl 2015-12-13-21-05-18.progressionbackup | less
+There are 2 scripts that can be used to dump the contents of the backup file (everything):
+
+* `./dump.pl <file>` - builds a tree structure that's easy to look at.
+* `./dddump.pl <file>` - fairly short, using `Data::Dumper` to generate crude output.
+
+There is also a script that summarizes the workout sessions only.
+
+* `./summary.pl <file>` - it will grow up to be a real tool some day with command line options, and more features.
+
 
 # what else?
 
