@@ -102,8 +102,8 @@ sub dumpfile {
         my $txt = <IN>;
         close(IN);
 
-        if ($txt =~ m/==$/) {
-                $txt = decode_base64($txt);
+        if (my $dec = decode_base64($txt)) {
+                $txt = $dec;
         }
 
         my $j0 = decode_json $txt;
