@@ -10,6 +10,7 @@ use Data::Dumper;
 $Data::Dumper::Purity = 0;
 $Data::Dumper::Indent = 1;
 $Data::Dumper::Terse  = 1;
+$Data::Dumper::Sortkeys = 1;
 
 sub expand_nested {
         my ($in) = @_;
