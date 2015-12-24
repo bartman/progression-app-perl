@@ -128,11 +128,19 @@ sub walk_fws {
         for ( $s->{session_number}=0; $s->{session_number}<=$#$fws; $s->{session_number}++ ) {
                 $s->{session} = $fws->[$s->{session_number}];
 
+                if (defined $h->{session_filter}) {
+                        next if not $h->{session_filter}($h,$s);
+                }
+
                 $h->{session}($h,$s) if defined $h->{session};
 
                 my $activities = $s->{session}->{activities};
                 for ( $s->{activity_number}=0; $s->{activity_number}<=$#$activities; $s->{activity_number}++ ) {
                         $s->{activity} = $activities->[$s->{activity_number}];
+
+                        if (defined $h->{activity_filter}) {
+                                next if not $h->{activity_filter}($h,$s);
+                        }
 
                         $h->{activity}($h,$s) if defined $h->{activity};
 
@@ -207,7 +215,7 @@ sub walk_fws {
 
 
 sub summarize_file {
-        my ($file) = @_;
+        my ($handlers, $file) = @_;
 
         open(IN, $file) || die "$file: failed to open";
         my $txt = <IN>;
@@ -223,14 +231,21 @@ sub summarize_file {
 
         my $fws = $e->{'fws.json'};
 
-        walk_fws($full_dump, $fws);
+        walk_fws($handlers, $fws);
 }
 
 my $file;
+my $handlers = $full_dump;
 
 die "$0 <progressionbackup>\n" if $#ARGV < 0;
 
+# $handlers->{session_filter} = sub {
+#         my ($h,$s) = @_;
+#
+#         $s->{session_number} == 0;
+# };
+
 foreach my $file (@ARGV) {
 
-        summarize_file($file);
+        summarize_file($handlers, $file);
 }
