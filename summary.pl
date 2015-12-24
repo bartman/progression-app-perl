@@ -7,15 +7,16 @@ use strict;
 use MIME::Base64;
 use JSON;
 use POSIX qw(strftime);
-# if Math
-BEGIN {
-        unless (eval "use Math::Round") {
-                sub round {
-                        my ($in) = @_;
-                        return $in if not defined $in;
-                        return int($in + 0.5);
-                }
+
+# check if we have access to Math::Round, and if not, use our own
+my $have_math_round = (eval "use Math::Round");
+sub myround {
+        if (not $have_math_round) {
+                my ($in) = @_;
+                return $in if not defined $in;
+                return int($in + 0.5);
         }
+        return round($_);
 }
 
 sub expand_nested {
@@ -45,7 +46,7 @@ sub summarize_completedSets {
 
                 if (defined $s->{weight}) {
                         my $kg_to_lb = 2.20462;
-                        my $lb = round ($s->{weight} * $kg_to_lb);
+                        my $lb = myround ($s->{weight} * $kg_to_lb);
                         $this = "$lb x " .  $s->{reps};
 
                 } elsif (defined $s->{duration}) {
