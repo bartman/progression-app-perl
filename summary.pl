@@ -129,6 +129,76 @@ sub summarize_fws {
         }
 }
 
+my $full_dump = {
+        fws => sub {
+                my ($s) = @_ ;
+                warn "START\n";
+        },
+        session => sub {
+                my ($s) = @_ ;
+                warn "  SESSION '". ($s->{session}->{name} or "???") ."' {\n";
+        },
+        activity => sub {
+                my ($s) = @_ ;
+                warn "    ACTIVITY '". ($s->{activity}->{name} or "???") ."' {\n";
+        },
+        set => sub {
+                my ($s) = @_ ;
+                warn "      SET '". ($s->{set}->{weight} or "???") ."' kg\n";
+        },
+        activity_end => sub {
+                my ($s) = @_ ;
+                warn "    }\n";
+        },
+        session_end => sub {
+                my ($s) = @_ ;
+                warn "  }\n";
+        },
+        fws_end => sub {
+                my ($s) = @_ ;
+                warn "END\n";
+        },
+};
+
+
+sub walk_fws {
+        my ($h, $fws) = @_;
+
+        # the state object
+        my $s = {};
+
+        $h->{fws}($s) if defined $h->{fws};
+
+        for ( $s->{session_number}=0; $s->{session_number}<=$#$fws; $s->{session_number}++ ) {
+                $s->{session} = $fws->[$s->{session_number}];
+
+                $h->{session}($s) if defined $h->{session};
+
+                my $activities = $s->{session}->{activities};
+                for ( $s->{activity_number}=0; $s->{activity_number}<=$#$activities; $s->{activity_number}++ ) {
+                        $s->{activity} = $activities->[$s->{activity_number}];
+
+                        $h->{activity}($s) if defined $h->{activity};
+
+                        my $completedSets = $s->{activity}->{performance}->{completedSets};
+                        for ( $s->{set_number}=0; $s->{set_number}<=$#$completedSets; $s->{set_number}++ ) {
+
+                                $s->{set} = $completedSets->[$s->{set_number}];
+
+                                $h->{set}($s) if defined $h->{set};
+
+                        }
+
+                        $h->{activity_end}($s) if defined $h->{activity_end};
+                }
+
+                $h->{session_end}($s) if defined $h->{session_end};
+        }
+
+        $h->{fws_end}($s) if defined $h->{fws_end};
+}
+
+
 sub summarize_file {
         my ($file) = @_;
 
@@ -146,7 +216,9 @@ sub summarize_file {
 
         my $fws = $e->{'fws.json'};
 
-        summarize_fws($fws);
+        walk_fws($full_dump, $fws);
+
+        #summarize_fws($fws);
 }
 
 my $file;
