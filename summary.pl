@@ -47,7 +47,11 @@ sub summarize_completedSets {
                 if (defined $s->{weight}) {
                         my $kg_to_lb = 2.20462;
                         my $lb = myround ($s->{weight} * $kg_to_lb);
-                        $this = "$lb x " .  $s->{reps};
+
+                        $this = "$lb";
+
+                        my $reps = $s->{reps};
+                        $this .= " x $reps" if defined $reps;
 
                 } elsif (defined $s->{duration}) {
                         my $sec = $s->{duration} / 1000;
