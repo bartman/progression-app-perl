@@ -37,14 +37,15 @@ my $full_dump = {
         # configuration...
 
         combine_sets => 1,
+        convert_to_lb => 1,
 
         # handlers...
 
         fws => sub {
-                my ($s) = @_ ;
+                my ($h,$s) = @_ ;
         },
         session => sub {
-                my ($s) = @_ ;
+                my ($h,$s) = @_ ;
 
                 my $i = $s->{session_number};
                 my $n = $s->{session}->{name};
@@ -61,15 +62,44 @@ my $full_dump = {
                 print "  @ $start + $hours hours\n";
         },
         activity => sub {
-                my ($s) = @_ ;
+                my ($h,$s) = @_ ;
 
                 my $i = $s->{activity_number};
                 my $n = $s->{activity}->{name};
 
                 print "  #$i - $n\n";
         },
+        format_set => sub {
+                my ($h,$s) = @_;
+                my $set = $s->{set};
+
+                my $text;
+
+                if (defined $set->{weight}) {
+                        my $kg_to_lb = 2.20462;
+                        my $weight = $set->{weight};
+
+                        $weight *= $kg_to_lb if $h->{convert_to_lb};
+
+                        my $lb = myround ($weight);
+
+                        $text = "$lb";
+
+                        my $reps = $set->{reps};
+                        $text .= " x $reps" if defined $reps;
+
+                } elsif (defined $set->{duration}) {
+                        my $sec = $set->{duration} / 1000;
+                        $text = "$sec sec";
+
+                } else {
+                        $text = "BW x " . $set->{reps};
+                }
+
+                return $text;
+        },
         set => sub {
-                my ($s) = @_ ;
+                my ($h,$s) = @_ ;
                 if ($s->{set_rept}>1) {
                         print "    ", $s->{set_text}, " x ", $s->{set_rept}, "\n";
                 } else {
@@ -77,40 +107,15 @@ my $full_dump = {
                 }
         },
         activity_end => sub {
-                my ($s) = @_ ;
+                my ($h,$s) = @_ ;
         },
         session_end => sub {
-                my ($s) = @_ ;
+                my ($h,$s) = @_ ;
         },
         fws_end => sub {
-                my ($s) = @_ ;
+                my ($h,$s) = @_ ;
         },
 };
-
-sub format_set {
-        my ($set) = @_;
-
-        my $text;
-
-        if (defined $set->{weight}) {
-                my $kg_to_lb = 2.20462;
-                my $lb = myround ($set->{weight} * $kg_to_lb);
-
-                $text = "$lb";
-
-                my $reps = $set->{reps};
-                $text .= " x $reps" if defined $reps;
-
-        } elsif (defined $set->{duration}) {
-                my $sec = $set->{duration} / 1000;
-                $text = "$sec sec";
-
-        } else {
-                $text = "BW x " . $set->{reps};
-        }
-
-        return $text;
-}
 
 sub walk_fws {
         my ($h, $fws) = @_;
@@ -118,18 +123,18 @@ sub walk_fws {
         # the state object
         my $s = {};
 
-        $h->{fws}($s) if defined $h->{fws};
+        $h->{fws}($h,$s) if defined $h->{fws};
 
         for ( $s->{session_number}=0; $s->{session_number}<=$#$fws; $s->{session_number}++ ) {
                 $s->{session} = $fws->[$s->{session_number}];
 
-                $h->{session}($s) if defined $h->{session};
+                $h->{session}($h,$s) if defined $h->{session};
 
                 my $activities = $s->{session}->{activities};
                 for ( $s->{activity_number}=0; $s->{activity_number}<=$#$activities; $s->{activity_number}++ ) {
                         $s->{activity} = $activities->[$s->{activity_number}];
 
-                        $h->{activity}($s) if defined $h->{activity};
+                        $h->{activity}($h,$s) if defined $h->{activity};
 
                         if ($h->{combine_sets}) {
 
@@ -142,7 +147,7 @@ sub walk_fws {
 
                                         $s->{set} = $completedSets->[$s->{set_number}];
 
-                                        my $text = format_set($s->{set});
+                                        my $text = $h->{format_set}($h,$s);
 
                                         if ($text eq $s->{set_text}) {
 
@@ -152,7 +157,7 @@ sub walk_fws {
                                         } else {
                                                 # diffent workload, so dump the current set first
                                                 if ($s->{set_rept}>0) {
-                                                        $h->{set}($s) if defined $h->{set};
+                                                        $h->{set}($h,$s) if defined $h->{set};
                                                 }
 
                                                 # now start a new set
@@ -163,7 +168,7 @@ sub walk_fws {
 
                                 # the last set was not shown yet
                                 if ($s->{set_rept}>0) {
-                                        $h->{set}($s) if defined $h->{set};
+                                        $h->{set}($h,$s) if defined $h->{set};
                                 }
 
                                 # cleanup
@@ -177,9 +182,9 @@ sub walk_fws {
 
                                         $s->{set} = $completedSets->[$s->{set_number}];
 
-                                        $s->{set_text} = format_set($s->{set});
+                                        $s->{set_text} = $h->{format_set}($h,$s);
 
-                                        $h->{set}($s) if defined $h->{set};
+                                        $h->{set}($h,$s) if defined $h->{set};
 
                                 }
                                 undef $s->{set_number};
@@ -187,17 +192,17 @@ sub walk_fws {
 
                         }
 
-                        $h->{activity_end}($s) if defined $h->{activity_end};
+                        $h->{activity_end}($h,$s) if defined $h->{activity_end};
                 }
                 undef $s->{activity_number};
                 undef $s->{activity};
 
-                $h->{session_end}($s) if defined $h->{session_end};
+                $h->{session_end}($h,$s) if defined $h->{session_end};
         }
         undef $s->{session_number};
         undef $s->{session};
 
-        $h->{fws_end}($s) if defined $h->{fws_end};
+        $h->{fws_end}($h,$s) if defined $h->{fws_end};
 }
 
 
