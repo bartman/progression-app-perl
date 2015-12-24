@@ -34,14 +34,14 @@ sub expand_nested {
 }
 
 sub summarize_completedSets {
-        my ($prefix, $completed) = @_;
+        my ($prefix, $completedSets) = @_;
 
         my $last = "";
         my $rep = 0;
 
-        for ( my $si=0; $si<=$#$completed; $si++ ) {
+        for ( my $si=0; $si<=$#$completedSets; $si++ ) {
 
-                my $s = $completed->[$si];
+                my $s = $completedSets->[$si];
                 my $this = "";
 
                 if (defined $s->{weight}) {
@@ -88,10 +88,25 @@ sub summarize_completedSets {
         }
 }
 
-sub summarize_data {
-        my ($d) = @_;
+sub summarize_activities {
+        my ($prefix, $activities) = @_;
 
-        my $fws = $d->{'fws.json'};
+        for ( my $ai=0; $ai<=$#$activities; $ai++ ) {
+
+                my $a = $activities->[$ai];
+
+                print "  #$ai - ",
+                        $a->{name},
+                        "\n";
+
+                my $performance = $a->{performance};
+
+                summarize_completedSets("    ", $performance->{completedSets});
+        }
+}
+
+sub summarize_fws {
+        my ($fws) = @_;
 
         for ( my $wi=0; $wi<=$#$fws; $wi++ ) {
 
@@ -110,21 +125,7 @@ sub summarize_data {
 
                 print "  @ $start + $hours hours\n";
 
-                my $activities = $w->{activities};
-
-                for ( my $ai=0; $ai<=$#$activities; $ai++ ) {
-
-                        my $a = $activities->[$ai];
-
-                        print "  #$ai - ",
-                                $a->{name},
-                                "\n";
-
-                        my $performance = $a->{performance};
-                        my $completed = $performance->{completedSets};
-
-                        summarize_completedSets("    ", $completed);
-                }
+                summarize_activities("  ", $w->{activities});
         }
 }
 
@@ -143,7 +144,9 @@ sub summarize_file {
 
         my $e = expand_nested($j);
 
-        summarize_data($e);
+        my $fws = $e->{'fws.json'};
+
+        summarize_fws($fws);
 }
 
 my $file;
