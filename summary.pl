@@ -7,6 +7,8 @@ use strict;
 use MIME::Base64;
 use JSON;
 use POSIX qw(strftime);
+use Getopt::Long; # TODO: qw(:config auto_help) can generate --help from POD
+use Date::Parse;
 
 # check if we have access to Math::Round, and if not, use our own
 my $have_math_round = (eval "use Math::Round");
@@ -250,18 +252,78 @@ sub summarize_file {
         walk_fws($handlers, $fws);
 }
 
-my $file;
+# ------------------------------------------------------------------------
+
+my $progname = $0;
+$progname =~ s,.*/,,g;
+my $usage = "$progname [-d <YYYY/MM/DD> | -s <session>] <progressionbackup>";
+
+die "$usage\n" if $#ARGV < 0;
+
+my $arg_file;
+my $arg_date;
+my $arg_session;
+
+GetOptions (
+        "input=s"    => \$arg_file,
+        "date=s"     => \$arg_date,
+        "session=i"  => \$arg_session,
+        "help"       => sub {
+                print $usage, "\n";
+                exit 0
+        },
+) or die("Error in command line arguments\n");
+
+if (not defined $arg_file) {
+        die "$progname: input file is requred, see --help\n";
+}
+
+if (defined $arg_date and defined $arg_session) {
+        die "$progname: cannot filter on session number and date, see --help\n";
+}
+
 my $handlers = $full_dump;
 
-die "$0 <progressionbackup>\n" if $#ARGV < 0;
+if (defined $arg_session) {
 
-# $handlers->{session_filter} = sub {
-#         my ($h,$s) = @_;
-#
-#         $s->{session_number} == 0;
-# };
+        # select the right session based on index
 
-foreach my $file (@ARGV) {
+        $handlers->{session_filter} = sub {
+                my ($h,$s) = @_;
 
-        summarize_file($handlers, $file);
+                $s->{session_number} == $arg_session;
+        };
+
+} elsif (defined $arg_date) {
+
+        # select the right session based on date
+
+        my $filter_date = str2time($arg_date)
+                or die "$progname: invalid date format, see --help\n";
+
+        my $filter_date_end = $filter_date + (24 * 60 * 60);
+
+        $filter_date *= 1000;
+        $filter_date_end *= 1000;
+
+        $handlers->{session_filter} = sub {
+                my ($h,$s) = @_;
+
+
+                $s->{session}->{startTime} <= $filter_date_end
+                && $s->{session}->{endTime} >= $filter_date;
+
+        };
+
+} else {
+
+        # don't show activities
+
+        $handlers->{activity_filter} = sub {
+                my ($h,$s) = @_;
+
+                0;
+        };
 }
+
+summarize_file($handlers, $arg_file);
