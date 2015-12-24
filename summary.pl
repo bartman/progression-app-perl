@@ -33,6 +33,20 @@ sub expand_nested {
         return \%out;
 }
 
+sub activity_name_map {
+        my ($n) = @_;
+        if ($n =~ m/Barbell Squat/) {
+                return '#squat';
+        } elsif ($n =~ m/Barbell Shoulder Press/) {
+                return '#OHP';
+        } elsif ($n =~ m/Barbell Deadlift/) {
+                return '#deadlift';
+        }
+        $n =~ tr/[A-Z]/[a-z]/;
+        $n =~ s/ +/-/g;
+        return "#$n";
+};
+
 my $full_dump = {
         # configuration...
 
@@ -51,7 +65,6 @@ my $full_dump = {
                 my $n = $s->{session}->{name};
                 $n = "<improvised>" if not defined $n;
 
-                print "[$i] $n\n";
 
                 my $startTime = $s->{session}->{startTime} / 1000;
                 my $endTime = $s->{session}->{endTime} / 1000;
@@ -59,15 +72,20 @@ my $full_dump = {
                 my $start = strftime "%Y/%m/%d %H:%M:%S", localtime($startTime);
                 my $hours = int(($endTime - $startTime) / 36) / 100;
 
-                print "  @ $start + $hours hours\n";
+                printf "%-5s  %-30s    @ %s\n",
+                "[$i]",
+                $n,
+                "$start + $hours hours";
         },
         activity => sub {
                 my ($h,$s) = @_ ;
 
-                my $i = $s->{activity_number};
+                #my $i = $s->{activity_number};
                 my $n = $s->{activity}->{name};
 
-                print "  #$i - $n\n";
+                $n = activity_name_map($n);
+
+                print "$n\n";
         },
         format_set => sub {
                 my ($h,$s) = @_;
@@ -100,11 +118,9 @@ my $full_dump = {
         },
         set => sub {
                 my ($h,$s) = @_ ;
-                if ($s->{set_rept}>1) {
-                        print "    ", $s->{set_text}, " x ", $s->{set_rept}, "\n";
-                } else {
-                        print "    ", $s->{set_text}, "\n";
-                }
+                my $text = $s->{set_text};
+                $text .= " x " . $s->{set_rept} if $s->{set_rept} > 1;
+                print "$text\n";
         },
         activity_end => sub {
                 my ($h,$s) = @_ ;
