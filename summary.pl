@@ -96,9 +96,10 @@ sub summarize_data {
         for ( my $wi=0; $wi<=$#$fws; $wi++ ) {
 
                 my $w = $fws->[$wi];
+                my $n = $w->{name};
+                $n = "<improvised>" if not defined $n;
 
-                print "[$wi] ",
-                        $w->{name},
+                print "[$wi] $n",
                         "\n";
 
                 my $startTime = $w->{startTime} / 1000;
