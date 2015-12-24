@@ -33,130 +33,104 @@ sub expand_nested {
         return \%out;
 }
 
-sub summarize_completedSets {
-        my ($prefix, $completedSets) = @_;
+my $full_dump = {
+        fws => sub {
+                my ($s) = @_ ;
+        },
+        session => sub {
+                my ($s) = @_ ;
 
-        my $last = "";
-        my $rep = 0;
-
-        for ( my $si=0; $si<=$#$completedSets; $si++ ) {
-
-                my $s = $completedSets->[$si];
-                my $this = "";
-
-                if (defined $s->{weight}) {
-                        my $kg_to_lb = 2.20462;
-                        my $lb = myround ($s->{weight} * $kg_to_lb);
-
-                        $this = "$lb";
-
-                        my $reps = $s->{reps};
-                        $this .= " x $reps" if defined $reps;
-
-                } elsif (defined $s->{duration}) {
-                        my $sec = $s->{duration} / 1000;
-                        $this = "$sec sec";
-
-                } else {
-                        $this = "BW x " . $s->{reps};
-                }
-
-                if ($this eq $last) {
-
-                        $rep ++;
-
-                } else {
-                        if ($rep>0) {
-                                if ($rep>1) {
-                                        print "    ", $last, " x $rep\n";
-                                } else {
-                                        print "    ", $last, "\n";
-                                }
-                        }
-
-                        $last = $this;
-                        $rep = 1;
-                }
-        }
-
-        if ($rep>0) {
-                if ($rep>1) {
-                        print "    ", $last, " x $rep\n";
-                } else {
-                        print "    ", $last, "\n";
-                }
-        }
-}
-
-sub summarize_activities {
-        my ($prefix, $activities) = @_;
-
-        for ( my $ai=0; $ai<=$#$activities; $ai++ ) {
-
-                my $a = $activities->[$ai];
-
-                print "  #$ai - ",
-                        $a->{name},
-                        "\n";
-
-                my $performance = $a->{performance};
-
-                summarize_completedSets("    ", $performance->{completedSets});
-        }
-}
-
-sub summarize_fws {
-        my ($fws) = @_;
-
-        for ( my $wi=0; $wi<=$#$fws; $wi++ ) {
-
-                my $w = $fws->[$wi];
-                my $n = $w->{name};
+                my $i = $s->{session_number};
+                my $n = $s->{session}->{name};
                 $n = "<improvised>" if not defined $n;
 
-                print "[$wi] $n",
-                        "\n";
+                print "[$i] $n\n";
 
-                my $startTime = $w->{startTime} / 1000;
-                my $endTime = $w->{endTime} / 1000;
+                my $startTime = $s->{session}->{startTime} / 1000;
+                my $endTime = $s->{session}->{endTime} / 1000;
 
                 my $start = strftime "%Y/%m/%d %H:%M:%S", localtime($startTime);
                 my $hours = int(($endTime - $startTime) / 36) / 100;
 
                 print "  @ $start + $hours hours\n";
-
-                summarize_activities("  ", $w->{activities});
-        }
-}
-
-my $full_dump = {
-        fws => sub {
-                my ($s) = @_ ;
-                warn "START\n";
-        },
-        session => sub {
-                my ($s) = @_ ;
-                warn "  SESSION '". ($s->{session}->{name} or "???") ."' {\n";
         },
         activity => sub {
                 my ($s) = @_ ;
-                warn "    ACTIVITY '". ($s->{activity}->{name} or "???") ."' {\n";
+
+                my $i = $s->{activity_number};
+                my $n = $s->{activity}->{name};
+
+                print "  #$i - $n\n";
+
+                # prepare for walking the sets
+                $s->{set_rept} = 0;
+                $s->{set_last} = "";
         },
         set => sub {
                 my ($s) = @_ ;
-                warn "      SET '". ($s->{set}->{weight} or "???") ."' kg\n";
+
+                my $this = "";
+
+                # first, convert the set into test
+                if (defined $s->{set}->{weight}) {
+                        my $kg_to_lb = 2.20462;
+                        my $lb = myround ($s->{set}->{weight} * $kg_to_lb);
+
+                        $this = "$lb";
+
+                        my $reps = $s->{set}->{reps};
+                        $this .= " x $reps" if defined $reps;
+
+                } elsif (defined $s->{set}->{duration}) {
+                        my $sec = $s->{set}->{duration} / 1000;
+                        $this = "$sec sec";
+
+                } else {
+                        $this = "BW x " . $s->{set}->{reps};
+                }
+
+                # now figure out if it's a repeat
+                if ($this eq $s->{set_last}) {
+
+                        # same work as last time, increment the repeats
+                        $s->{set_rept} ++;
+
+                } else {
+                        # diffent workload, so dump the current set first
+                        if ($s->{set_rept}>0) {
+                                if ($s->{set_rept}>1) {
+                                        print "    ", $s->{set_last}, " x $s->{set_rept}\n";
+                                } else {
+                                        print "    ", $s->{set_last}, "\n";
+                                }
+                        }
+
+                        # now start a new set
+                        $s->{set_last} = $this;
+                        $s->{set_rept} = 1;
+                }
         },
         activity_end => sub {
                 my ($s) = @_ ;
-                warn "    }\n";
+
+                # close last set
+                if ($s->{set_rept}>0) {
+                        if ($s->{set_rept}>1) {
+                                print "    ", $s->{set_last}, " x ", $s->{set_rept}, "\n";
+                        } else {
+                                print "    ", $s->{set_last}, "\n";
+                        }
+                }
+
+                # cleanup
+                undef $s->{set_rept};
+                undef $s->{set_last};
         },
         session_end => sub {
                 my ($s) = @_ ;
-                warn "  }\n";
         },
         fws_end => sub {
                 my ($s) = @_ ;
-                warn "END\n";
         },
 };
 
