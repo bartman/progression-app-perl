@@ -188,12 +188,18 @@ sub walk_fws {
                                 $h->{set}($s) if defined $h->{set};
 
                         }
+                        undef $s->{set_number};
+                        undef $s->{set};
 
                         $h->{activity_end}($s) if defined $h->{activity_end};
                 }
+                undef $s->{activity_number};
+                undef $s->{activity};
 
                 $h->{session_end}($s) if defined $h->{session_end};
         }
+        undef $s->{session_number};
+        undef $s->{session};
 
         $h->{fws_end}($s) if defined $h->{fws_end};
 }
