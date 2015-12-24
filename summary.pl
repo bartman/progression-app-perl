@@ -143,7 +143,8 @@ sub walk_fws {
 
         $h->{fws}($h,$s) if defined $h->{fws};
 
-        for ( $s->{session_number}=0; $s->{session_number}<=$#$fws; $s->{session_number}++ ) {
+        #for ( $s->{session_number}=0; $s->{session_number}<=$#$fws; $s->{session_number}++ ) {
+        for ( $s->{session_number}=$#$fws; $s->{session_number}>=0; $s->{session_number}-- ) {
                 $s->{session} = $fws->[$s->{session_number}];
 
                 if (defined $h->{session_filter}) {
