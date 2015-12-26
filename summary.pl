@@ -37,12 +37,18 @@ sub expand_nested {
 
 sub activity_name_map {
         my ($n) = @_;
-        if ($n =~ m/Barbell Squat/) {
+        if ($n =~ m/^Barbell Squat/) {
                 return '#squat';
-        } elsif ($n =~ m/Barbell Shoulder Press/) {
+        } elsif ($n =~ m/^Barbell Bench Press/) {
+                return '#bench-press';
+        } elsif ($n =~ m/^Barbell Shoulder Press/) {
                 return '#OHP';
-        } elsif ($n =~ m/Barbell Deadlift/) {
+        } elsif ($n =~ m/^Bent-Over Barbell Row/) {
+                return '#barbell-row';
+        } elsif ($n =~ m/^Barbell Deadlift/) {
                 return '#deadlift';
+        } elsif ($n =~ m/^Triceps Dip/) {
+                return '#dips';
         }
         $n =~ tr/[A-Z]/[a-z]/;
         $n =~ s/ +/-/g;
