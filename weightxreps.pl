@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 #
-# this is just a quick dumper of the file using Data::Dumper
+# this script generates summary of Progression workouts in format
+# compatible with weightxreps.net website.
 #
 
 use strict;
