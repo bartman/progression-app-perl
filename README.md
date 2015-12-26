@@ -8,20 +8,51 @@ See http://www.progression-app.com/ to learn more about Progression.
 
 If you export your workouts with Progression, you'll get a `DATE TIME.progressionbackup` file.
 
-There are 2 scripts that can be used to dump the contents of the backup file (everything):
+The main script is called `weightxreps.pl` and it can read from Progression backup file, and generate
+weightxreps.net journal entries based on the workouts.
+
+To list all workouts in the backup file:
+
+    # ./weightxreps.pl -i data/2015-12-26-15-48-17.progressionbackup
+    ...
+    [2]    <improvised>                      @ 2015/12/21 19:03:29 + 0.92 hours
+    [1]    B (squat, OHP, deadlift)          @ 2015/12/23 08:36:50 + 2.2 hours
+    [0]    A (squat, bench, row)             @ 2015/12/26 09:54:10 + 1.86 hours
+
+entries are listed in reverse-chronological order so that most recent sessions
+show up at the bottom.  Each entry consists of session number, workout name
+(if you follow a schedule, or `<improvised>` if you do not), the starting
+date and time, and the duration.
+
+To generate a `weightxreps` journal entry, select a session and run...
+
+    # ./weightxreps.pl -i data/2015-12-26-15-48-17.progressionbackup -s 0
+    #squat
+    135 x 5
+    225 x 5 x 5
+    #bench-press
+    135 x 5
+    190 x 5 x 3
+    190 x 4 x 2
+    #barbell-row
+    135 x 5
+    170 x 5 x 5
+    #dips
+    BW x 10 x 3
+
+Journal entries can also be generated for sessions(s) matching a date.  As above
+select a date from the summary output and run...
+
+    # ./weightxreps.pl -i data/2015-12-26-15-48-17.progressionbackup -d 2015/12/26
+    ...
+
+See `weightxreps.pl -help` and `-man` for more information.
+
+# debug tools
+
+There are also 2 scripts that can be used to dump the contents of the backup file (everything):
 
 * `./dump.pl <file>` - builds a tree structure that's easy to look at.
 * `./dddump.pl <file>` - fairly short, using `Data::Dumper` to generate crude output.
 
-There is also a script that summarizes the workout sessions only.
 
-* `./summary.pl <file>` - it will grow up to be a real tool some day with command line options, and more features.
-
-
-# what else?
-
-I have a short list of things I'd like to accomplish:
-
-* enumerate workouts (index, date, routine, movements, sets, reps, etc)
-* enumerate a workout given an index or date (a table of weight x reps x sets, with any comments)
-* generate http://weightxreps.net/ format as output for a given date (with some anotation)
