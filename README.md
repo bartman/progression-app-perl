@@ -9,7 +9,7 @@ See http://www.progression-app.com/ to learn more about Progression.
 If you export your workouts with Progression, you'll get a `DATE TIME.progressionbackup` file.
 
 The main script is called `weightxreps.pl` and it can read from Progression backup file, and generate
-weightxreps.net journal entries based on the workouts.
+[weightxreps.net](http://weightxreps.net) journal entries based on the workouts.
 
 To list all workouts in the backup file:
 
@@ -19,7 +19,7 @@ To list all workouts in the backup file:
     [1]    B (squat, OHP, deadlift)          @ 2015/12/23 08:36:50 + 2.2 hours
     [0]    A (squat, bench, row)             @ 2015/12/26 09:54:10 + 1.86 hours
 
-entries are listed in reverse-chronological order so that most recent sessions
+Above, entries are listed in reverse-chronological order so that most recent sessions
 show up at the bottom.  Each entry consists of session number, workout name
 (if you follow a schedule, or `<improvised>` if you do not), the starting
 date and time, and the duration.
@@ -45,6 +45,8 @@ select a date from the summary output and run...
 
     # ./weightxreps.pl -i data/2015-12-26-15-48-17.progressionbackup -d 2015/12/26
     ...
+
+Note that if multiple sessions match a single date, they will both be output.
 
 See `weightxreps.pl -help` and `-man` for more information.
 
