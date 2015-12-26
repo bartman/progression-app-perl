@@ -46,6 +46,8 @@ sub activity_name_map {
         }
         $n =~ tr/[A-Z]/[a-z]/;
         $n =~ s/ +/-/g;
+        $n =~ s/[^a-z-]//g;
+        $n =~ s/-warmup$//;
         return "#$n";
 };
 
@@ -75,9 +77,9 @@ my $full_dump = {
                 my $hours = int(($endTime - $startTime) / 36) / 100;
 
                 printf "%-5s  %-30s    @ %s\n",
-                "[$i]",
-                $n,
-                "$start + $hours hours";
+                        "[$i]",
+                        $n,
+                        "$start + $hours hours";
         },
         activity => sub {
                 my ($h,$s) = @_ ;
@@ -86,6 +88,9 @@ my $full_dump = {
                 my $n = $s->{activity}->{name};
 
                 $n = activity_name_map($n);
+
+                return if $s->{last_activity_printed} eq $n;
+                $s->{last_activity_printed} = $n;
 
                 print "$n\n";
         },
