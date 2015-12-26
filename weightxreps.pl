@@ -96,7 +96,7 @@ my $full_dump = {
 
                 $n = activity_name_map($n);
 
-                return if $s->{last_activity_printed} eq $n;
+                return if ($s->{last_activity_printed} or "") eq $n;
                 $s->{last_activity_printed} = $n;
 
                 print "$n\n";
