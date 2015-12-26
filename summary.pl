@@ -257,7 +257,7 @@ sub summarize_file {
 
 my $progname = $0;
 $progname =~ s,.*/,,g;
-my $usage = "$progname [-d <YYYY/MM/DD> | -s <session>] <progressionbackup>";
+my $usage = "$progname [-d <YYYY/MM/DD> | -s <number>] -i <progressionbackup>";
 
 die "$usage\n" if $#ARGV < 0;
 
@@ -266,10 +266,10 @@ my $arg_date;
 my $arg_session;
 
 GetOptions (
-        "input=s"    => \$arg_file,
-        "date=s"     => \$arg_date,
-        "session=i"  => \$arg_session,
-        "help"       => sub {
+        "i|input=s"    => \$arg_file,
+        "d|date=s"     => \$arg_date,
+        "s|session=i"  => \$arg_session,
+        "h|help"       => sub {
                 print $usage, "\n";
                 exit 0
         },
