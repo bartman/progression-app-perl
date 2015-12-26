@@ -8,7 +8,8 @@ use strict;
 use MIME::Base64;
 use JSON;
 use POSIX qw(strftime);
-use Getopt::Long; # TODO: qw(:config auto_help) can generate --help from POD
+use Getopt::Long qw(:config auto_help); # generate --help from POD
+use Pod::Usage qw(pod2usage);
 use Date::Parse;
 
 # check if we have access to Math::Round, and if not, use our own
@@ -269,8 +270,8 @@ sub summarize_file {
 
 my $progname = $0;
 $progname =~ s,.*/,,g;
-my $usage = "$progname [-d <YYYY/MM/DD> | -s <number>] -i <progressionbackup>";
 
+my $usage = "$progname [-h | -help] [-d <YYYY/MM/DD> | -s <number>] -i <progressionbackup>";
 die "$usage\n" if $#ARGV < 0;
 
 my $arg_file;
@@ -286,10 +287,7 @@ GetOptions (
         "s|session=i"  => \$arg_session,
         "all"          => sub { $handlers->{combine_sets} = 0; },
         "kg"           => sub { $handlers->{convert_to_lb} = 0; },
-        "h|help"       => sub {
-                print $usage, "\n";
-                exit 0
-        },
+        "man"          => sub { pod2usage(-verbose => 2, -exitval => 0); },
 ) or die("Error in command line arguments\n");
 
 if (not defined $arg_file) {
@@ -343,3 +341,80 @@ if (defined $arg_session) {
 }
 
 summarize_file($handlers, $arg_file);
+
+__END__
+=head1 NAME
+
+weightxreps.pl - convert Progression App backup files to weightxreps.net
+
+=head1 SYNOPSIS
+
+weightxreps.pl [options]
+
+Options:
+
+  -h -help             brief help message
+  -man                 full documentation
+
+  -i -input <file>     progression backup file to read from
+
+  -d -date <date>      date to select for output (YYYY/MM/DD)
+  -s -session <num>    session number for output
+
+  --all                list each set individually
+  --kg                 generate weights in kg units
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<-usage>
+
+Print the syntax line and exit.
+
+=item B<-help>
+
+Print a brief help message and exit.
+
+=item B<-man>
+
+Print the manual page and exit.
+
+=item B<-input>
+
+Mandatory, identifies which .progressionbackup file read data from.  If no
+other options are specified, to restrict or increase output verbosity, then
+a brief session summary will be printed.  Each line contains:
+
+  - session number,
+  - workout name,
+  - date/time started, and
+  - duration.
+
+=item B<-date>
+
+Optional, restricts output to the date specified (YYYY/MM/DD), and expands
+verbosity to show workout activities.
+
+=item B<-session>
+
+Optional, restricts output to the specified session number, and expands
+verbosity to show workout activities.
+
+=item B<-all>
+
+Optional, shows each identical set on its own line.  By default, identical
+sets are combined into "<weight> x <reps> x <sets>" format.
+
+=item B<-kg>
+
+Optional, use kg units, instead of lb.
+
+=back
+
+=head1 DESCRIPTION
+
+B<weightxreps.pl> will read a given B<progressionbackup> file and generate
+journal entries in B<weightxreps.net> format.
+
+=cut
