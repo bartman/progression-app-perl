@@ -277,10 +277,15 @@ my $arg_file;
 my $arg_date;
 my $arg_session;
 
+# start with default handlers...
+my $handlers = $full_dump;
+
 GetOptions (
         "i|input=s"    => \$arg_file,
         "d|date=s"     => \$arg_date,
         "s|session=i"  => \$arg_session,
+        "all"          => sub { $handlers->{combine_sets} = 0; },
+        "kg"           => sub { $handlers->{convert_to_lb} = 0; },
         "h|help"       => sub {
                 print $usage, "\n";
                 exit 0
@@ -294,8 +299,6 @@ if (not defined $arg_file) {
 if (defined $arg_date and defined $arg_session) {
         die "$progname: cannot filter on session number and date, see --help\n";
 }
-
-my $handlers = $full_dump;
 
 if (defined $arg_session) {
 
