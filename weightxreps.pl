@@ -129,6 +129,10 @@ my $full_dump = {
                         $text = "BW x " . $set->{reps};
                 }
 
+                if (defined $set->{comment}) {
+                        $text .= "  " . $set->{comment};
+                }
+
                 return $text;
         },
         set => sub {
