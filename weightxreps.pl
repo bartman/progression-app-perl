@@ -41,6 +41,8 @@ sub activity_name_map {
         my ($n) = @_;
         if ($n =~ m/^Barbell Squat/) {
                 return '#squat';
+        } elsif ($n =~ m/^Barbell Front Squat/) {
+                return '#front-squat';
         } elsif ($n =~ m/^Barbell Bench Press/) {
                 return '#bench-press';
         } elsif ($n =~ m/^Barbell Shoulder Press/) {
