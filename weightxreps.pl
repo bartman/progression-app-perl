@@ -123,9 +123,14 @@ my $full_dump = {
                         my $reps = $set->{reps};
                         $text .= " x $reps" if defined $reps;
 
+                        if (defined $set->{duration}) {
+                                my $sec = $set->{duration} / 1000;
+                                $text .= " @ $sec sec";
+                        }
+
                 } elsif (defined $set->{duration}) {
                         my $sec = $set->{duration} / 1000;
-                        $text = "$sec sec";
+                        $text = "BW @ $sec sec";
 
                 } else {
                         $text = "BW x " . $set->{reps};
