@@ -61,6 +61,19 @@ sub activity_name_map {
         return "#$n";
 };
 
+sub activity_name_is_bw {
+        my ($n) = @_;
+        if ($n =~ m/^Triceps Dip/i) {
+                return 1;
+        } elsif ($n =~ m/^Pullup/i) {
+                return 1;
+        } elsif ($n =~ m/^Chinup/i) {
+                return 1;
+        }
+        return 0;
+}
+
+
 my $full_dump = {
         # configuration...
 
@@ -119,6 +132,11 @@ my $full_dump = {
                         my $lb = myround ($weight);
 
                         $text = "$lb";
+
+                        my $n = $s->{activity}->{name};
+                        if ( activity_name_is_bw($n) ) {
+                                $text = "BW+$lb";
+                        }
 
                         my $reps = $set->{reps};
                         $text .= " x $reps" if defined $reps;
