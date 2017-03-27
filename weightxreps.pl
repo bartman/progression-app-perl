@@ -134,14 +134,19 @@ my $full_dump = {
                         $text = "$lb";
 
                         my $n = $s->{activity}->{name};
-                        if ( activity_name_is_bw($n) ) {
+                        if ( activity_name_is_bw($n)) {
                                 $text = "BW+$lb";
+                        } elsif ($text eq "0") {
+                                $text = "BW";
                         }
 
                         my $reps = $set->{reps};
-                        $text .= " x $reps" if defined $reps;
+                        if (defined $reps && $reps>0) {
+                                $text .= " x $reps";
+                        }
 
-                        if (defined $set->{duration}) {
+                        my $dur = $set->{duration};
+                        if (defined $dur && $dur>0) {
                                 my $sec = $set->{duration} / 1000;
                                 $text .= " @ $sec sec";
                         }
