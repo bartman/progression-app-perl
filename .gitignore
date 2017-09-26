@@ -3,3 +3,5 @@
 .*.swp
 data/*.json
 data/*.csv
+data/*.progressionbackup
+.wxrsecrets
