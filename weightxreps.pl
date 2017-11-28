@@ -11,6 +11,7 @@ use POSIX qw(strftime);
 use Getopt::Long qw(:config auto_help); # generate --help from POD
 use Pod::Usage qw(pod2usage);
 use Date::Parse;
+use TryCatch;
 
 # check if we have access to Math::Round, and if not, use our own
 my $have_math_round = (eval "use Math::Round");
@@ -292,15 +293,24 @@ sub summarize_file {
         my $txt = <IN>;
         close(IN);
 
-        if (my $dec = decode_base64($txt)) {
-                $txt = $dec;
+        my $fws;
+
+        try {
+                $fws = decode_json($txt);
+
+        } catch {
+
+                if (my $dec = decode_base64($txt)) {
+                        $txt = $dec;
+                }
+
+                my $j = decode_json($txt);
+
+                my $e = expand_nested($j);
+
+                $fws = $e->{'fws.json'};
+
         }
-
-        my $j = decode_json($txt);
-
-        my $e = expand_nested($j);
-
-        my $fws = $e->{'fws.json'};
 
         walk_fws($handlers, $fws);
 }
@@ -313,7 +323,7 @@ $progname =~ s,.*/,,g;
 my $usage = "$progname [-h | -help] [-d <YYYY/MM/DD> | -s <number>] -i <progressionbackup>";
 die "$usage\n" if $#ARGV < 0;
 
-my $arg_file;
+my $arg_file = 'fws.json';
 my $arg_date;
 my $arg_session;
 
