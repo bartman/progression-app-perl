@@ -51,6 +51,10 @@ sub activity_name_map {
                 return '#barbell-row';
         } elsif ($n =~ m/^Barbell Deadlift/i) {
                 return '#deadlift';
+        } elsif ($n =~ m/^Close-Grip Barbell Bench Press/i) {
+                return '#close-grip-bench-press';
+        } elsif ($n =~ m/^Incline Barbell Bench Press/i) {
+                return '#incline-bench-press';
         } elsif ($n =~ m/^Triceps Dip/i) {
                 return '#dips';
         }
@@ -58,6 +62,7 @@ sub activity_name_map {
         $n =~ s/ +/-/g;
         $n =~ s/[^a-z-]//g;
         $n =~ s/-warmup$//;
+        $n =~ s/-nsuns-t$//;
         return "#$n";
 };
 
