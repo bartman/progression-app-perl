@@ -1,0 +1,1 @@
+adb pull /sdcard/Android/data/workout.progression/fws.json .
