@@ -118,10 +118,10 @@ my $full_dump = {
 
                 $n = activity_name_map($n);
 
-                return if ($s->{last_activity_printed} or "") eq $n;
+                return if ($s->{last_activity_printed} || "") eq $n;
                 $s->{last_activity_printed} = $n;
 
-                print "$n\n";
+                print "\n$n\n";
         },
         format_set => sub {
                 my ($h,$s) = @_;
@@ -174,7 +174,16 @@ my $full_dump = {
         set => sub {
                 my ($h,$s) = @_ ;
                 my $text = $s->{set_text};
-                $text .= " x " . $s->{set_rept} if $s->{set_rept} > 1;
+                if ($s->{set_rept} > 1) {
+                        my $sets = " x " . $s->{set_rept};
+                        if ($text =~ m/^(\d+\s+(x\s+\d+)?)(\s+.*)?$/) {
+                                my $wxr = $1;
+                                my $cmnt = $3 || "";
+                                $text = "$wxr$sets$cmnt";
+                        } else {
+                                $text .= $sets;
+                        }
+                }
                 print "$text\n";
         },
         activity_end => sub {
