@@ -1,0 +1,8 @@
+#!/bin/bash
+
+base=/sdcard/Android/data/workout.progression/
+files=( ms.json fws.json up.json ua.json )
+
+for f in ${files[@]} ; do
+        adb push $f $base/$f
+done
