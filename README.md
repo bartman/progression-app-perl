@@ -4,14 +4,19 @@ This repository hosts scripts used to decode `*.progressionbackup` files generat
 
 See http://www.progression-app.com/ to learn more about Progression.
 
-# what can I do?
+# how can I get my data
 
 If you export your workouts with Progression, you'll get a `DATE TIME.progressionbackup` file.
 
-The main script is called `weightxreps.pl` and it can read from Progression backup file, and generate
-[weightxreps.net](http://weightxreps.net) journal entries based on the workouts.
+Alternatively you can use `./pull-from-device` to copy the database from your device
+using ADB (`fws.json`, `ms.json`, `ua.json`, `up.json`) or some other means.
 
-To list all workouts in the backup file:
+# what can I do?
+
+The main script is called `weightxreps.pl`, and it can read from
+`aws.json` or a `*.progressionbackup` file.
+
+Specifying no other options will list all the workouts.
 
     # ./weightxreps.pl -i data/2015-12-26-15-48-17.progressionbackup
     ...
@@ -19,10 +24,19 @@ To list all workouts in the backup file:
     [1]    B (squat, OHP, deadlift)          @ 2015/12/23 08:36:50 + 2.2 hours
     [0]    A (squat, bench, row)             @ 2015/12/26 09:54:10 + 1.86 hours
 
+    # ./weightxreps.pl -i fws.json
+    ...
+    [2]    5/3/1 D1 squat                    @ 2020/09/07 13:15:42 + 1.23 hours
+    [1]    5/3/1 D2 bench                    @ 2020/09/08 15:06:45 + 0.69 hours
+    [0]    5/3/1 D3 deadlift                 @ 2020/09/09 15:54:24 + 0.99 hours
+
 Above, entries are listed in reverse-chronological order so that most recent sessions
 show up at the bottom.  Each entry consists of session number, workout name
 (if you follow a schedule, or `<improvised>` if you do not), the starting
 date and time, and the duration.
+
+Selecting a session, allows one to see the workout details in
+[weightxreps.net](http://weightxreps.net) journal format.
 
 To generate a `weightxreps` journal entry, select a session and run...
 
@@ -39,6 +53,22 @@ To generate a `weightxreps` journal entry, select a session and run...
     170 x 5 x 5
     #dips
     BW x 10 x 3
+
+    # ./weightxreps.pl -i fws.json -s 0
+    [0]    5/3/1 D3 deadlift                 @ 2020/09/09 15:54:24 + 0.99 hours
+
+    #deadlift
+    135 x 10
+    165 x 5
+    205 x 5
+    245 x 5
+    315 x 5  R
+    355 x 3
+    390 x 10
+    390 x 5
+    315 x 10
+    205 x 10 x 5
+
 
 Journal entries can also be generated for sessions(s) matching a date.  As above
 select a date from the summary output and run...
