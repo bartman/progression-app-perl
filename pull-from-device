@@ -3,6 +3,6 @@
 base=/sdcard/Android/data/workout.progression/
 files=( ms.json fws.json up.json ua.json )
 
-for f in ${files[@]} ; do
-        adb pull $base/$f .
+for f in "${files[@]}" ; do
+        adb pull "$base/$f" .
 done
